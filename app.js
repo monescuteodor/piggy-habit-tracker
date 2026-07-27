@@ -4,13 +4,13 @@ import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword, si
 import { getFirestore, doc, setDoc, getDoc, collection, getDocs } from 'https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js';
 
 const firebaseConfig = {
-  apiKey: "AIzaSyDr7Il1FNluwLUrSD7KGQLmQosBi0uRUQU",
-  authDomain: "piggy-habit-tracker.firebaseapp.com",
-  projectId: "piggy-habit-tracker",
-  storageBucket: "piggy-habit-tracker.firebasestorage.app",
-  messagingSenderId: "881775857501",
-  appId: "1:881775857501:web:f58a7cc6bff3418b1fe2b4",
-  measurementId: "G-9MPW6MTJDG"
+  apiKey: "",
+  authDomain: "",
+  projectId: "",
+  storageBucket: "",
+  messagingSenderId: ""
+  appId: "",
+  measurementId: ""
 };
 
 const app  = initializeApp(firebaseConfig);

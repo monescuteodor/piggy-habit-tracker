@@ -1,0 +1,194 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<title>Piggy</title>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+body{
+  font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;
+  background:#2A1A1F;color:#FDF6F0;
+  width:320px;padding-bottom:16px;
+}
+.header{display:flex;align-items:center;justify-content:space-between;padding:14px 16px 12px;border-bottom:1px solid #3D2530}
+.logo{font-size:18px;font-weight:700;color:#F4A0B5;letter-spacing:-0.5px}
+.user-info{display:flex;align-items:center;gap:8px}
+.avatar{width:26px;height:26px;border-radius:50%;background:#F4A0B5;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;color:#2A1A1F}
+.user-name{font-size:11px;color:#888}
+.btn-signout{font-size:10px;color:#555;background:transparent;border:1px solid #3D2530;border-radius:5px;padding:3px 8px;font-family:inherit;cursor:pointer}
+.btn-signout:hover{color:#F4A0B5;border-color:#F4A0B5}
+
+/* AUTH */
+#auth-screen{padding:16px}
+.auth-pig{display:flex;justify-content:center;margin-bottom:12px}
+.auth-title{font-size:15px;font-weight:600;text-align:center;margin-bottom:4px}
+.auth-sub{font-size:12px;color:#888;text-align:center;margin-bottom:18px}
+.field{margin-bottom:12px}
+.field label{display:block;font-size:11px;color:#888;margin-bottom:5px}
+.field input{width:100%;padding:10px 12px;background:#3D2530;border:1px solid #5a3040;border-radius:8px;color:#FDF6F0;font-size:13px;font-family:inherit;outline:none;transition:0.2s}
+.field input:focus{border-color:#F4A0B5}
+.error-msg{font-size:11px;color:#E24B4A;min-height:14px;margin-bottom:8px}
+.btn-submit{width:100%;padding:11px;background:#F4A0B5;color:#2A1A1F;border:none;border-radius:9px;font-size:13px;font-weight:600;font-family:inherit;transition:0.2s;margin-top:2px}
+.btn-submit:hover{background:#F4C5D3}
+.btn-submit:disabled{background:#3D2530;color:#555;cursor:default}
+.auth-toggle{text-align:center;font-size:12px;color:#888;margin-top:12px}
+.auth-toggle span{color:#F4A0B5;cursor:pointer}
+
+/* MAIN */
+#main-screen{display:none}
+#pig-wrap{display:flex;flex-direction:column;align-items:center;padding:14px 16px 8px}
+#pig-label{font-size:11px;color:#666;margin-top:5px;letter-spacing:0.05em;text-transform:uppercase}
+
+.total-card{margin:0 16px 10px;background:#3D2530;border:1px solid #5a3040;border-radius:12px;padding:12px 14px;display:flex;align-items:center;justify-content:space-between}
+.total-label{font-size:10px;color:#666;text-transform:uppercase;letter-spacing:0.07em;margin-bottom:3px}
+.total-val{font-size:26px;font-weight:700;color:#F4A0B5;line-height:1}
+.total-sub{font-size:11px;color:#666;margin-top:3px}
+.decay-ring{position:relative;width:52px;height:52px;flex-shrink:0}
+.decay-ring svg{transform:rotate(-90deg)}
+.decay-pct{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:600;color:#F4A0B5}
+
+.section-label{font-size:10px;letter-spacing:0.08em;text-transform:uppercase;color:#555;padding:0 16px 7px}
+.site-row{display:flex;align-items:center;gap:10px;padding:5px 16px}
+.site-fav{width:16px;height:16px;border-radius:3px;flex-shrink:0;overflow:hidden;background:#3D2530}
+.site-fav img{width:16px;height:16px;border-radius:3px}
+.site-name{flex:1;font-size:12px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.site-time{font-size:11px;color:#888;flex-shrink:0;min-width:40px;text-align:right}
+.site-pct{font-size:10px;color:#555;flex-shrink:0;min-width:28px;text-align:right}
+.bar-wrap{height:3px;background:#3D2530;border-radius:2px;margin:1px 16px 3px;overflow:hidden}
+.bar-fill{height:100%;border-radius:2px}
+
+.verdict{margin:10px 16px 0;background:#3D2530;border:1px solid #5a3040;border-radius:9px;padding:9px 12px;font-size:11px;color:#aaa;font-style:italic;line-height:1.4;text-align:center}
+.device-badge{display:flex;align-items:center;justify-content:center;gap:6px;margin:8px 16px 0;font-size:10px;color:#555}
+.device-dot{width:6px;height:6px;border-radius:50%;background:#6BAE3E}
+
+.open-btn{display:block;width:calc(100% - 32px);margin:10px 16px 0;padding:10px;background:#F4A0B5;color:#2A1A1F;border:none;border-radius:9px;font-size:13px;font-weight:600;font-family:inherit;transition:0.2s}
+.open-btn:hover{background:#F4C5D3}
+</style>
+</head>
+<body>
+
+<div class="header">
+  <div class="logo">Piggy</div>
+  <div class="user-info" id="user-info" style="display:none">
+    <div class="avatar" id="hdr-avatar">?</div>
+    <span class="user-name" id="hdr-name"></span>
+    <button class="btn-signout" id="btn-signout">sign out</button>
+  </div>
+</div>
+
+<!-- AUTH SCREEN -->
+<div id="auth-screen">
+  <div class="auth-pig">
+    <svg viewBox="0 0 120 96" width="90" height="72" xmlns="http://www.w3.org/2000/svg">
+      <ellipse cx="60" cy="74" rx="38" ry="22" fill="#F4A0B5"/>
+      <ellipse cx="60" cy="48" rx="30" ry="28" fill="#F4A0B5"/>
+      <ellipse cx="37" cy="30" rx="11" ry="8" fill="#F4A0B5"/>
+      <ellipse cx="83" cy="30" rx="11" ry="8" fill="#F4A0B5"/>
+      <ellipse cx="37" cy="30" rx="6" ry="4" fill="#F4C5D3"/>
+      <ellipse cx="83" cy="30" rx="6" ry="4" fill="#F4C5D3"/>
+      <ellipse cx="60" cy="58" rx="12" ry="9" fill="#F4C5D3"/>
+      <circle cx="57" cy="58" r="2" fill="#D47090"/><circle cx="63" cy="58" r="2" fill="#D47090"/>
+      <circle cx="49" cy="42" r="5" fill="white"/><circle cx="49" cy="42" r="2.5" fill="#2A1A1F"/>
+      <circle cx="71" cy="42" r="5" fill="white"/><circle cx="71" cy="42" r="2.5" fill="#2A1A1F"/>
+      <path d="M53 52 Q60 57 67 52" stroke="#D47090" stroke-width="1.5" fill="none" stroke-linecap="round"/>
+      <ellipse cx="60" cy="17" rx="20" ry="5" fill="none" stroke="#FFD700" stroke-width="2"/>
+    </svg>
+  </div>
+
+  <!-- Sign In -->
+  <div id="signin-panel">
+    <div class="auth-title">Sign in to Piggy</div>
+    <div class="auth-sub">Your pig is waiting.</div>
+    <div class="field"><label>Email</label><input type="email" id="si-email" placeholder="you@example.com"/></div>
+    <div class="field"><label>Password</label><input type="password" id="si-pass" placeholder="••••••••"/></div>
+    <div class="error-msg" id="si-error"></div>
+    <button class="btn-submit" id="si-btn">Sign in</button>
+    <div class="auth-toggle">No account? <span id="go-signup">Sign up</span></div>
+  </div>
+
+  <!-- Sign Up -->
+  <div id="signup-panel" style="display:none">
+    <div class="auth-title">Create account</div>
+    <div class="auth-sub">Save your pig's progress.</div>
+    <div class="field"><label>Name</label><input type="text" id="su-name" placeholder="Your name"/></div>
+    <div class="field"><label>Email</label><input type="email" id="su-email" placeholder="you@example.com"/></div>
+    <div class="field"><label>Password</label><input type="password" id="su-pass" placeholder="at least 6 characters"/></div>
+    <div class="error-msg" id="su-error"></div>
+    <button class="btn-submit" id="su-btn">Create account</button>
+    <div class="auth-toggle">Already have an account? <span id="go-signin">Sign in</span></div>
+  </div>
+</div>
+
+<!-- MAIN SCREEN (after login) -->
+<div id="main-screen">
+  <div id="pig-wrap">
+    <svg id="pig-svg" viewBox="0 0 120 96" width="100" height="80" xmlns="http://www.w3.org/2000/svg">
+      <ellipse id="p-body" cx="60" cy="74" rx="42" ry="22" fill="#F4A0B5"/>
+      <ellipse id="p-head" cx="60" cy="48" rx="30" ry="28" fill="#F4A0B5"/>
+      <ellipse id="p-el" cx="37" cy="30" rx="11" ry="8" fill="#F4A0B5"/>
+      <ellipse id="p-er" cx="83" cy="30" rx="11" ry="8" fill="#F4A0B5"/>
+      <ellipse cx="37" cy="30" rx="6" ry="4" fill="#F4C5D3"/>
+      <ellipse cx="83" cy="30" rx="6" ry="4" fill="#F4C5D3"/>
+      <ellipse cx="60" cy="58" rx="12" ry="9" fill="#F4C5D3"/>
+      <circle cx="57" cy="58" r="2" fill="#D47090"/><circle cx="63" cy="58" r="2" fill="#D47090"/>
+      <circle id="p-elw" cx="49" cy="42" r="5" fill="white"/>
+      <circle id="p-elp" cx="49" cy="42" r="2.5" fill="#2A1A1F"/>
+      <circle id="p-erw" cx="71" cy="42" r="5" fill="white"/>
+      <circle id="p-erp" cx="71" cy="42" r="2.5" fill="#2A1A1F"/>
+      <path id="p-mouth" d="M53 52 Q60 57 67 52" stroke="#D47090" stroke-width="1.5" fill="none" stroke-linecap="round"/>
+      <rect x="46" y="88" width="12" height="8" rx="5" fill="#F4A0B5"/>
+      <rect x="62" y="88" width="12" height="8" rx="5" fill="#F4A0B5"/>
+      <g id="p-wrinkles" opacity="0">
+        <path d="M42 37 Q46 34 50 37" fill="none" stroke="#D47090" stroke-width="0.9" opacity="0.6"/>
+        <path d="M70 37 Q74 34 78 37" fill="none" stroke="#D47090" stroke-width="0.9" opacity="0.6"/>
+      </g>
+      <g id="p-bags" opacity="0">
+        <path d="M45 47 Q49 50 53 47" fill="none" stroke="#D47090" stroke-width="0.9" opacity="0.5"/>
+        <path d="M67 47 Q71 50 75 47" fill="none" stroke="#D47090" stroke-width="0.9" opacity="0.5"/>
+      </g>
+      <g id="p-xeyes" opacity="0">
+        <line x1="45" y1="38" x2="53" y2="46" stroke="#2A1A1F" stroke-width="1.5" stroke-linecap="round"/>
+        <line x1="53" y1="38" x2="45" y2="46" stroke="#2A1A1F" stroke-width="1.5" stroke-linecap="round"/>
+        <line x1="67" y1="38" x2="75" y2="46" stroke="#2A1A1F" stroke-width="1.5" stroke-linecap="round"/>
+        <line x1="75" y1="38" x2="67" y2="46" stroke="#2A1A1F" stroke-width="1.5" stroke-linecap="round"/>
+      </g>
+      <ellipse id="p-halo" cx="60" cy="17" rx="20" ry="5" fill="none" stroke="#FFD700" stroke-width="2" opacity="0"/>
+    </svg>
+    <div id="pig-label">happy 🌸</div>
+  </div>
+
+  <div class="total-card">
+    <div>
+      <div class="total-label">Screen time today</div>
+      <div class="total-val" id="total-val">0min</div>
+      <div class="total-sub" id="total-sub">across 0 sites</div>
+    </div>
+    <div class="decay-ring">
+      <svg width="52" height="52" viewBox="0 0 52 52">
+        <circle cx="26" cy="26" r="20" fill="none" stroke="#3D2530" stroke-width="5"/>
+        <circle id="ring-fill" cx="26" cy="26" r="20" fill="none" stroke="#F4A0B5"
+          stroke-width="5" stroke-dasharray="125.7" stroke-dashoffset="125.7"
+          stroke-linecap="round" style="transition:stroke-dashoffset 0.6s ease"/>
+      </svg>
+      <div class="decay-pct" id="ring-pct">0%</div>
+    </div>
+  </div>
+
+  <div id="sites-section" style="display:none">
+    <div class="section-label">Top sites</div>
+    <div id="sites-list"></div>
+  </div>
+
+  <div class="verdict" id="verdict">"The pig is proud of you. For now."</div>
+  <div class="device-badge">
+    <div class="device-dot"></div>
+    <span id="device-label">laptop · syncing...</span>
+  </div>
+
+  <button class="open-btn" id="open-btn">Open Piggy</button>
+</div>
+
+<script src="firebase.js"></script>
+<script src="popup.js"></script>
+</body>
+</html>

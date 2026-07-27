@@ -1,0 +1,555 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Piggy — your habits age him</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"/>
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;500;700;800&family=Inter:wght@400;500&display=swap" rel="stylesheet"/>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --pink:#F4A0B5;--pink-light:#F4C5D3;--bg:#2A1A1F;--bg2:#3D2530;--bg3:#5a3040;
+  --cream:#FDF6F0;--gray:#888;--gray2:#555;
+  --green:#6BAE3E;--amber:#D4920B;--red:#E24B4A;
+}
+html{font-family:'Inter',sans-serif;background:var(--bg);color:var(--cream);min-height:100vh}
+button{cursor:pointer;font-family:inherit}
+.screen{display:none;min-height:100vh;flex-direction:column}
+.screen.active{display:flex}
+
+/* LANDING */
+#landing{align-items:center;justify-content:center;text-align:center;padding:2rem;position:relative;overflow:hidden}
+#landing::before{content:'';position:absolute;inset:0;background:radial-gradient(ellipse 60% 50% at 50% 60%,#3D2530 0%,transparent 70%);pointer-events:none}
+.landing-inner{position:relative;z-index:1;max-width:460px}
+.hero-pig{margin:0 auto 32px;width:160px;height:130px}
+.logo{font-family:'Syne',sans-serif;font-size:56px;font-weight:800;color:var(--pink);letter-spacing:-2px;line-height:1}
+.tagline{font-size:15px;color:var(--gray);margin:10px 0 36px}
+.cta-stack{display:flex;flex-direction:column;gap:12px;align-items:center}
+.btn-pink{background:var(--pink);color:var(--bg);border:none;padding:14px 36px;border-radius:100px;font-size:15px;font-weight:600;transition:0.2s}
+.btn-pink:hover{background:var(--pink-light);transform:translateY(-1px)}
+.btn-ghost{background:transparent;color:var(--gray);border:1px solid var(--bg2);padding:12px 28px;border-radius:100px;font-size:14px;transition:0.2s}
+.btn-ghost:hover{border-color:var(--pink);color:var(--pink)}
+.fine-print{font-size:12px;color:var(--gray2);margin-top:24px}
+
+/* AUTH */
+#auth{align-items:center;justify-content:center;padding:2rem;min-height:100vh}
+.auth-card{background:var(--bg2);border:1px solid var(--bg3);border-radius:20px;padding:2rem;width:100%;max-width:380px}
+.auth-logo{font-family:'Syne',sans-serif;font-size:28px;font-weight:800;color:var(--pink);text-align:center;margin-bottom:6px}
+.auth-sub{text-align:center;font-size:13px;color:var(--gray);margin-bottom:24px}
+.field{margin-bottom:14px}
+.field label{display:block;font-size:12px;color:var(--gray);margin-bottom:6px}
+.field input{width:100%;padding:12px 14px;background:var(--bg);border:1px solid var(--bg3);border-radius:10px;color:var(--cream);font-size:14px;font-family:inherit;outline:none;transition:0.2s}
+.field input:focus{border-color:var(--pink)}
+.error-msg{font-size:12px;color:var(--red);margin-bottom:10px;min-height:16px}
+.auth-submit{width:100%;padding:13px;background:var(--pink);color:var(--bg);border:none;border-radius:12px;font-size:14px;font-weight:600;margin-top:4px;transition:0.2s}
+.auth-submit:hover{background:var(--pink-light)}
+.auth-submit:disabled{background:var(--bg3);color:var(--gray);cursor:default}
+.auth-toggle{text-align:center;font-size:13px;color:var(--gray);margin-top:16px}
+.auth-toggle span{color:var(--pink);cursor:pointer}
+.back-link{text-align:center;margin-top:14px;font-size:12px;color:var(--gray2);cursor:pointer}
+.back-link:hover{color:var(--pink)}
+
+/* NAV */
+.nav{display:flex;align-items:center;justify-content:space-between;padding:1.2rem 1.5rem;border-bottom:1px solid var(--bg2);flex-shrink:0}
+.nav-logo{font-family:'Syne',sans-serif;font-size:20px;font-weight:800;color:var(--pink)}
+.nav-right{display:flex;align-items:center;gap:10px}
+.nav-name{font-size:13px;color:var(--gray)}
+.avatar{width:32px;height:32px;border-radius:50%;background:var(--pink);display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:600;color:var(--bg)}
+.btn-logout{font-size:12px;color:var(--gray);padding:4px 10px;border-radius:6px;border:1px solid var(--bg2);background:transparent;transition:0.2s}
+.btn-logout:hover{color:var(--pink);border-color:var(--pink)}
+
+/* DASHBOARD */
+#dashboard{background:var(--bg)}
+.dash-scroll{flex:1;overflow-y:auto;padding:1.5rem;max-width:600px;margin:0 auto;width:100%}
+.top-row{display:flex;gap:1.5rem;align-items:flex-start;margin-bottom:1.5rem}
+.pig-col{flex-shrink:0;text-align:center}
+.pig-stage{font-size:11px;color:var(--gray);margin-top:4px;text-transform:uppercase;letter-spacing:0.05em}
+.pig-dots{display:flex;gap:5px;justify-content:center;margin-top:6px}
+.pig-dot{width:7px;height:7px;border-radius:50%;background:var(--bg2)}
+.pig-dot.on{background:var(--pink)}
+.summary-col{flex:1}
+.greeting{font-family:'Syne',sans-serif;font-size:22px;font-weight:700;line-height:1.2;margin-bottom:6px}
+.verdict-text{font-size:13px;color:var(--gray);line-height:1.5;margin-bottom:12px;font-style:italic}
+.streak{display:inline-flex;align-items:center;gap:6px;background:var(--bg2);border:1px solid var(--bg3);border-radius:100px;padding:6px 14px;font-size:13px;color:var(--pink)}
+.section-label{font-size:11px;font-weight:500;letter-spacing:0.1em;text-transform:uppercase;color:var(--gray2);margin-bottom:10px}
+.total-card{background:var(--bg2);border:1px solid var(--bg3);border-radius:14px;padding:1.2rem 1.4rem;display:flex;align-items:center;justify-content:space-between;margin-bottom:1.5rem}
+.total-label{font-size:10px;color:var(--gray2);text-transform:uppercase;letter-spacing:0.07em;margin-bottom:4px}
+.total-val{font-size:32px;font-weight:700;color:var(--pink);line-height:1}
+.total-sub{font-size:12px;color:var(--gray2);margin-top:4px}
+.ring-wrap{position:relative;width:60px;height:60px;flex-shrink:0}
+.ring-wrap svg{transform:rotate(-90deg)}
+.ring-pct{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:600;color:var(--pink)}
+.ext-banner{background:var(--bg2);border:1px solid var(--bg3);border-radius:14px;padding:1.2rem 1.4rem;margin-bottom:1.5rem;text-align:center}
+.ext-banner p{font-size:13px;color:var(--gray);line-height:1.6}
+.ext-banner strong{color:var(--cream)}
+.sites-card{background:var(--bg2);border:1px solid var(--bg3);border-radius:14px;overflow:hidden;margin-bottom:1.5rem}
+.site-row{display:flex;align-items:center;gap:10px;padding:10px 14px}
+.site-row+.site-row{border-top:1px solid var(--bg3)}
+.site-fav{width:18px;height:18px;border-radius:4px;flex-shrink:0;overflow:hidden;background:var(--bg)}
+.site-fav img{width:16px;height:16px;border-radius:3px}
+.site-name{flex:1;font-size:13px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.site-bar-col{width:80px;flex-shrink:0}
+.site-bar-bg{height:4px;background:var(--bg);border-radius:2px;overflow:hidden}
+.site-bar-fill{height:100%;border-radius:2px}
+.site-time{font-size:12px;color:var(--gray);flex-shrink:0;min-width:46px;text-align:right}
+.site-pct{font-size:11px;color:var(--gray2);flex-shrink:0;min-width:30px;text-align:right}
+.chart-card{background:var(--bg2);border:1px solid var(--bg3);border-radius:14px;padding:1.2rem;margin-bottom:1.5rem}
+.chart-bars{display:flex;align-items:flex-end;gap:8px;height:80px;margin-bottom:8px}
+.chart-col{flex:1;display:flex;flex-direction:column;align-items:center;gap:4px}
+.chart-bar{width:100%;border-radius:4px 4px 0 0;min-height:4px}
+.chart-day{font-size:10px;color:var(--gray2)}
+.chart-legend{display:flex;gap:14px;flex-wrap:wrap;margin-top:8px}
+.legend-item{font-size:11px;color:var(--gray);display:flex;align-items:center;gap:5px}
+.legend-dot{width:8px;height:8px;border-radius:50%}
+
+/* HISTORY */
+#history{background:var(--bg)}
+.hist-scroll{flex:1;overflow-y:auto;padding:1.5rem;max-width:600px;margin:0 auto;width:100%}
+.hist-title{font-family:'Syne',sans-serif;font-size:22px;font-weight:700;margin-bottom:4px}
+.hist-sub{font-size:13px;color:var(--gray);margin-bottom:1.5rem}
+.hist-list{display:flex;flex-direction:column;gap:10px}
+.hist-entry{background:var(--bg2);border:1px solid var(--bg3);border-radius:12px;padding:1rem 1.2rem;display:flex;align-items:center;gap:14px}
+.hist-info{flex:1}
+.hist-date{font-size:12px;color:var(--gray2);margin-bottom:3px}
+.hist-vals{font-size:13px;color:var(--gray)}
+.hist-score{font-size:13px;font-weight:500}
+.score-ok{color:var(--green)}.score-bad{color:var(--amber)}.score-rip{color:var(--red)}
+
+/* BOTTOM NAV */
+.bottom-nav{display:flex;border-top:1px solid var(--bg2);background:var(--bg);flex-shrink:0}
+.bnav{flex:1;padding:14px 0;font-size:11px;color:var(--gray2);border:none;background:transparent;display:flex;flex-direction:column;align-items:center;gap:4px;transition:0.2s}
+.bnav.active{color:var(--pink)}
+.bnav svg{width:20px;height:20px}
+
+@media(max-width:480px){.top-row{flex-direction:column;align-items:center;text-align:center}.logo{font-size:42px}}
+</style>
+</head>
+<body>
+
+<!-- LANDING -->
+<div class="screen active" id="landing">
+  <div class="landing-inner">
+    <div class="hero-pig">
+      <svg viewBox="0 0 160 130" xmlns="http://www.w3.org/2000/svg">
+        <ellipse cx="80" cy="100" rx="48" ry="28" fill="#F4A0B5"/>
+        <ellipse cx="80" cy="70" rx="32" ry="30" fill="#F4A0B5"/>
+        <ellipse cx="58" cy="48" rx="11" ry="8" fill="#F4A0B5"/>
+        <ellipse cx="102" cy="48" rx="11" ry="8" fill="#F4A0B5"/>
+        <ellipse cx="58" cy="48" rx="6" ry="4" fill="#F4C5D3"/>
+        <ellipse cx="102" cy="48" rx="6" ry="4" fill="#F4C5D3"/>
+        <ellipse cx="80" cy="80" rx="13" ry="9" fill="#F4C5D3"/>
+        <circle cx="76" cy="80" r="2.5" fill="#D47090"/>
+        <circle cx="84" cy="80" r="2.5" fill="#D47090"/>
+        <circle cx="71" cy="64" r="4.5" fill="white"/><circle cx="71" cy="64" r="2.2" fill="#2A1A1F"/>
+        <circle cx="89" cy="64" r="4.5" fill="white"/><circle cx="89" cy="64" r="2.2" fill="#2A1A1F"/>
+        <path d="M74 73 Q80 78 86 73" stroke="#D47090" stroke-width="1.5" fill="none" stroke-linecap="round"/>
+        <rect x="60" y="120" width="12" height="10" rx="6" fill="#F4A0B5"/>
+        <rect x="88" y="120" width="12" height="10" rx="6" fill="#F4A0B5"/>
+        <ellipse cx="80" cy="28" rx="16" ry="4" fill="none" stroke="#FFD700" stroke-width="2"/>
+      </svg>
+    </div>
+    <div class="logo">Piggy</div>
+    <div class="tagline">your habits age him.</div>
+    <div class="cta-stack">
+      <button class="btn-pink" id="btn-get-started">Get started — it's free</button>
+      <button class="btn-ghost" id="btn-sign-in">Sign in</button>
+    </div>
+    <div class="fine-print">no phone access. just you and the pig.</div>
+  </div>
+</div>
+
+<!-- AUTH -->
+<div class="screen" id="auth">
+  <div class="auth-card">
+    <div class="auth-logo">Piggy</div>
+    <div class="auth-sub" id="auth-sub">Create your account</div>
+    <div id="signup-form">
+      <div class="field"><label>Name</label><input type="text" id="su-name" placeholder="Your name"/></div>
+      <div class="field"><label>Email</label><input type="email" id="su-email" placeholder="you@example.com"/></div>
+      <div class="field"><label>Password</label><input type="password" id="su-pass" placeholder="at least 6 characters"/></div>
+      <div class="error-msg" id="su-error"></div>
+      <button class="auth-submit" id="su-btn">Create account</button>
+      <div class="auth-toggle">Already have an account? <span id="go-signin">Sign in</span></div>
+    </div>
+    <div id="signin-form" style="display:none">
+      <div class="field"><label>Email</label><input type="email" id="si-email" placeholder="you@example.com"/></div>
+      <div class="field"><label>Password</label><input type="password" id="si-pass" placeholder="••••••••"/></div>
+      <div class="error-msg" id="si-error"></div>
+      <button class="auth-submit" id="si-btn">Sign in</button>
+      <div class="auth-toggle">No account? <span id="go-signup">Sign up</span></div>
+    </div>
+    <div class="back-link" id="auth-back">← Back</div>
+  </div>
+</div>
+
+<!-- DASHBOARD -->
+<div class="screen" id="dashboard">
+  <div class="nav">
+    <div class="nav-logo">Piggy</div>
+    <div class="nav-right">
+      <div class="avatar" id="user-avatar">?</div>
+      <span class="nav-name" id="nav-name"></span>
+      <button class="btn-logout" id="btn-logout">Sign out</button>
+    </div>
+  </div>
+  <div class="dash-scroll">
+    <div class="top-row">
+      <div class="pig-col">
+        <svg id="dash-pig" viewBox="0 0 120 100" width="110" height="92" xmlns="http://www.w3.org/2000/svg">
+          <ellipse id="dp-body" cx="60" cy="76" rx="38" ry="22" fill="#F4A0B5"/>
+          <ellipse id="dp-head" cx="60" cy="52" rx="26" ry="24" fill="#F4A0B5"/>
+          <ellipse id="dp-el" cx="42" cy="36" rx="9" ry="7" fill="#F4A0B5"/>
+          <ellipse id="dp-er" cx="78" cy="36" rx="9" ry="7" fill="#F4A0B5"/>
+          <ellipse cx="42" cy="36" rx="5" ry="4" fill="#F4C5D3"/>
+          <ellipse cx="78" cy="36" rx="5" ry="4" fill="#F4C5D3"/>
+          <ellipse cx="60" cy="62" rx="10" ry="7" fill="#F4C5D3"/>
+          <circle cx="57" cy="62" r="2" fill="#D47090"/><circle cx="63" cy="62" r="2" fill="#D47090"/>
+          <circle id="dp-elw" cx="52" cy="47" r="4" fill="white"/><circle id="dp-elp" cx="52" cy="47" r="2" fill="#2A1A1F"/>
+          <circle id="dp-erw" cx="68" cy="47" r="4" fill="white"/><circle id="dp-erp" cx="68" cy="47" r="2" fill="#2A1A1F"/>
+          <path id="dp-mouth" d="M55 56 Q60 60 65 56" stroke="#D47090" stroke-width="1.5" fill="none" stroke-linecap="round"/>
+          <rect x="48" y="90" width="10" height="8" rx="5" fill="#F4A0B5"/>
+          <rect x="62" y="90" width="10" height="8" rx="5" fill="#F4A0B5"/>
+          <g id="dp-wrinkles" opacity="0">
+            <path d="M47 44 Q50 42 53 44" fill="none" stroke="#D47090" stroke-width="0.8" opacity="0.6"/>
+            <path d="M67 44 Q70 42 73 44" fill="none" stroke="#D47090" stroke-width="0.8" opacity="0.6"/>
+            <path d="M55 68 Q60 71 65 68" stroke="#D47090" stroke-width="1" fill="none" opacity="0.7"/>
+          </g>
+          <g id="dp-bags" opacity="0">
+            <path d="M49 51 Q52 54 55 51" fill="none" stroke="#D47090" stroke-width="0.8" opacity="0.5"/>
+            <path d="M65 51 Q68 54 71 51" fill="none" stroke="#D47090" stroke-width="0.8" opacity="0.5"/>
+          </g>
+          <g id="dp-xeyes" opacity="0">
+            <line x1="49" y1="44" x2="55" y2="50" stroke="#2A1A1F" stroke-width="1.5" stroke-linecap="round"/>
+            <line x1="55" y1="44" x2="49" y2="50" stroke="#2A1A1F" stroke-width="1.5" stroke-linecap="round"/>
+            <line x1="65" y1="44" x2="71" y2="50" stroke="#2A1A1F" stroke-width="1.5" stroke-linecap="round"/>
+            <line x1="71" y1="44" x2="65" y2="50" stroke="#2A1A1F" stroke-width="1.5" stroke-linecap="round"/>
+          </g>
+          <ellipse id="dp-halo" cx="60" cy="18" rx="18" ry="4" fill="none" stroke="#FFD700" stroke-width="2" opacity="0"/>
+        </svg>
+        <div class="pig-dots" id="dp-dots">
+          <div class="pig-dot"></div><div class="pig-dot"></div><div class="pig-dot"></div>
+          <div class="pig-dot"></div><div class="pig-dot"></div>
+        </div>
+        <div class="pig-stage" id="dp-stage">happy 🌸</div>
+      </div>
+      <div class="summary-col">
+        <div class="greeting" id="dash-greeting">Hey!</div>
+        <div class="verdict-text" id="dash-verdict">"The pig is proud of you. For now."</div>
+        <div class="streak" id="dash-streak">🔥 0 day streak</div>
+      </div>
+    </div>
+
+    <div class="section-label">Today</div>
+    <div class="total-card">
+      <div>
+        <div class="total-label">Total screen time</div>
+        <div class="total-val" id="total-val">0min</div>
+        <div class="total-sub" id="total-sub">across 0 sites</div>
+      </div>
+      <div class="ring-wrap">
+        <svg width="60" height="60" viewBox="0 0 60 60">
+          <circle cx="30" cy="30" r="24" fill="none" stroke="#3D2530" stroke-width="5"/>
+          <circle id="ring-fill" cx="30" cy="30" r="24" fill="none" stroke="#F4A0B5"
+            stroke-width="5" stroke-dasharray="150.8" stroke-dashoffset="150.8"
+            stroke-linecap="round" style="transition:stroke-dashoffset 0.6s ease"/>
+        </svg>
+        <div class="ring-pct" id="ring-pct">0%</div>
+      </div>
+    </div>
+
+    <div class="ext-banner" id="ext-banner">
+      <p><strong>No data yet.</strong><br/>Install the <strong>Piggy Chrome extension</strong> to automatically track your screen time. Once installed, data appears here automatically.</p>
+    </div>
+
+    <div class="section-label" id="sites-label" style="display:none">Top sites</div>
+    <div class="sites-card" id="sites-card" style="display:none"></div>
+
+    <div class="section-label">Last 7 days</div>
+    <div class="chart-card">
+      <div class="chart-bars" id="chart-bars"><div style="color:#555;font-size:12px;width:100%;text-align:center;align-self:center">No data yet</div></div>
+      <div class="chart-legend">
+        <div class="legend-item"><div class="legend-dot" style="background:#6BAE3E"></div>good</div>
+        <div class="legend-item"><div class="legend-dot" style="background:#D4920B"></div>hmm</div>
+        <div class="legend-item"><div class="legend-dot" style="background:#E24B4A"></div>rip</div>
+      </div>
+    </div>
+  </div>
+  <div class="bottom-nav">
+    <button class="bnav active" id="bnav-today">
+      <svg fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>Today
+    </button>
+    <button class="bnav" id="bnav-history">
+      <svg fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>History
+    </button>
+  </div>
+</div>
+
+<!-- HISTORY -->
+<div class="screen" id="history">
+  <div class="nav">
+    <div class="nav-logo">Piggy</div>
+    <div class="nav-right">
+      <div class="avatar" id="hist-avatar">?</div>
+      <button class="btn-logout" id="hist-logout">Sign out</button>
+    </div>
+  </div>
+  <div class="hist-scroll">
+    <div class="hist-title">History</div>
+    <div class="hist-sub">How your pig has been doing.</div>
+    <div class="hist-list" id="hist-list"></div>
+  </div>
+  <div class="bottom-nav">
+    <button class="bnav" id="bnav-today-2">
+      <svg fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>Today
+    </button>
+    <button class="bnav active" id="bnav-history-2">
+      <svg fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>History
+    </button>
+  </div>
+</div>
+
+<script type="module">
+import { initializeApp }     from 'https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js';
+import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword,
+         signOut, onAuthStateChanged, updateProfile }
+                             from 'https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js';
+import { getFirestore, doc, setDoc, getDoc, collection, getDocs }
+                             from 'https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js';
+
+const FB = {
+  apiKey:"",
+  authDomain:"",
+  projectId:"",
+  storageBucket:"",
+  messagingSenderId:"",
+  appId:""
+};
+const app  = initializeApp(FB);
+const auth = getAuth(app);
+const db   = getFirestore(app);
+
+const $          = id => document.getElementById(id);
+const fmtTime    = s => { if(s<=0)return'0min';const m=Math.floor(s/60);if(m<60)return m+'min';const h=Math.floor(m/60),r=m%60;return r?`${h}h ${r}min`:`${h}h`; };
+const decayFrom  = s => Math.min(s/(12*3600),1);
+const barColor   = d => d<0.33?'#6BAE3E':d<0.66?'#D4920B':'#E24B4A';
+const todayKey   = () => new Date().toISOString().slice(0,10);
+
+// SCREENS
+function showScreen(id) {
+  document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active'));
+  $(id).classList.add('active');
+  if(id==='dashboard') renderDash();
+  if(id==='history')   renderHistory();
+}
+function showSignup() {
+  $('signup-form').style.display='block';
+  $('signin-form').style.display='none';
+  $('auth-sub').textContent='Create your account';
+  showScreen('auth');
+}
+function showSignin() {
+  $('signup-form').style.display='none';
+  $('signin-form').style.display='block';
+  $('auth-sub').textContent='Welcome back';
+  showScreen('auth');
+}
+
+// ERRORS
+const friendlyError = code => ({
+  'auth/email-already-in-use':'This email is already registered.',
+  'auth/invalid-email':'Invalid email address.',
+  'auth/weak-password':'Password must be at least 6 characters.',
+  'auth/user-not-found':'No account found with this email.',
+  'auth/wrong-password':'Wrong password.',
+  'auth/invalid-credential':'Wrong email or password.',
+  'auth/too-many-requests':'Too many attempts. Try again later.',
+}[code]||'Something went wrong. Try again.');
+
+// SIGN UP
+$('su-btn').addEventListener('click', async () => {
+  const name=$('su-name').value.trim(),email=$('su-email').value.trim(),pass=$('su-pass').value;
+  const err=$('su-error'),btn=$('su-btn');
+  err.textContent='';
+  if(!name){err.textContent='Please enter your name.';return;}
+  if(!email){err.textContent='Please enter your email.';return;}
+  if(pass.length<6){err.textContent='Password must be at least 6 characters.';return;}
+  btn.disabled=true;btn.textContent='Creating account...';
+  try {
+    const cred=await createUserWithEmailAndPassword(auth,email,pass);
+    await updateProfile(cred.user,{displayName:name});
+    await setDoc(doc(db,'users',cred.user.uid),{name,email,createdAt:new Date().toISOString(),streak:0});
+  } catch(e){err.textContent=friendlyError(e.code);btn.disabled=false;btn.textContent='Create account';}
+});
+
+// SIGN IN
+$('si-btn').addEventListener('click', async () => {
+  const email=$('si-email').value.trim(),pass=$('si-pass').value;
+  const err=$('si-error'),btn=$('si-btn');
+  err.textContent='';
+  if(!email||!pass){err.textContent='Please fill in all fields.';return;}
+  btn.disabled=true;btn.textContent='Signing in...';
+  try { await signInWithEmailAndPassword(auth,email,pass); }
+  catch(e){err.textContent=friendlyError(e.code);btn.disabled=false;btn.textContent='Sign in';}
+});
+
+// AUTH STATE
+onAuthStateChanged(auth, async user => {
+  if(user) {
+    const name=user.displayName||user.email.split('@')[0];
+    $('user-avatar').textContent=$('hist-avatar').textContent=name[0].toUpperCase();
+    $('nav-name').textContent=name;
+    $('dash-greeting').textContent=`Hey, ${name}!`;
+    try {
+      const snap=await getDoc(doc(db,'users',user.uid));
+      if(snap.exists()) $('dash-streak').textContent=`🔥 ${snap.data().streak||0} day streak`;
+    } catch{}
+    showScreen('dashboard');
+  } else {
+    showScreen('landing');
+  }
+});
+
+// PIG
+function applyPig(decay) {
+  const col=`rgb(${Math.round(244-decay*64)},${Math.round(160-decay*60)},${Math.round(181-decay*71)})`;
+  ['dp-body','dp-head','dp-el','dp-er'].forEach(id=>{const e=$(id);if(e)e.setAttribute('fill',col);});
+  const m=$('dp-mouth');
+  if(m) m.setAttribute('d',decay<0.2?'M55 56 Q60 60 65 56':decay<0.5?'M55 58 Q60 58 65 58':'M55 61 Q60 57 65 61');
+  const dead=decay>0.8?(decay-0.8)/0.2:0;
+  ['dp-elw','dp-erw','dp-elp','dp-erp'].forEach(id=>{const e=$(id);if(e)e.style.opacity=1-dead;});
+  const xe=$('dp-xeyes');if(xe)xe.style.opacity=dead;
+  const wr=$('dp-wrinkles');if(wr)wr.style.opacity=decay>0.3?Math.min((decay-0.3)/0.5,1):0;
+  const bg=$('dp-bags');if(bg)bg.style.opacity=decay>0.4?Math.min((decay-0.4)/0.4,1):0;
+  const hl=$('dp-halo');if(hl)hl.style.opacity=decay<0.05?1:0;
+  const stages=['happy 🌸','tired 😐','sad 😔','broken 😩','dead inside 💀'];
+  const verdicts=['"The pig is proud of you. For now."','"The pig noticed. He knows."','"Dark circles. He stayed up thinking about you."','"He looked in the mirror and cried."','"He left a note. It says: why?"'];
+  const stage=Math.min(Math.floor(decay*5),4);
+  const st=$('dp-stage');if(st)st.textContent=stages[stage];
+  const vd=$('dash-verdict');if(vd)vd.textContent=verdicts[stage];
+  document.querySelectorAll('#dp-dots .pig-dot').forEach((d,i)=>d.classList.toggle('on',i<stage));
+}
+function updateRing(decay) {
+  const C=2*Math.PI*24;
+  const f=$('ring-fill');if(f){f.style.strokeDashoffset=C*(1-decay);f.setAttribute('stroke',barColor(decay));}
+  const p=$('ring-pct');if(p)p.textContent=Math.round(decay*100)+'%';
+}
+
+// EXT DATA
+function getExtData(){try{return JSON.parse(localStorage.getItem('piggy_ext_bridge')||'null');}catch{return null;}}
+
+// DASHBOARD
+function renderDash() {
+  const ext=getExtData(),today=todayKey();
+  let totalSec=0,entries=[],hasExt=false;
+  if(ext&&ext[today]){
+    hasExt=true;
+    entries=Object.entries(ext[today]).sort((a,b)=>b[1]-a[1]);
+    totalSec=entries.reduce((s,[,v])=>s+v,0);
+    const user=auth.currentUser;
+    if(user){
+      setDoc(doc(db,'users',user.uid,'history',today),{
+        date:today,totalSec,sites:entries.length,
+        decay:Math.round(decayFrom(totalSec)*100)/100,
+        topSites:entries.slice(0,5).map(([d,s])=>({domain:d,seconds:s}))
+      }).catch(()=>{});
+    }
+  }
+  const decay=decayFrom(totalSec);
+  applyPig(decay);updateRing(decay);
+  $('total-val').textContent=fmtTime(totalSec);
+  $('total-sub').textContent=`across ${entries.length} site${entries.length!==1?'s':''}`;
+  $('ext-banner').style.display=hasExt?'none':'block';
+  const sl=$('sites-label'),sc=$('sites-card'),top5=entries.slice(0,5);
+  if(top5.length){
+    if(sl)sl.style.display='block';
+    if(sc){sc.style.display='block';
+      sc.innerHTML=top5.map(([domain,sec])=>{
+        const pct=Math.round(sec/totalSec*100),bp=Math.round(sec/entries[0][1]*100);
+        return `<div class="site-row">
+          <div class="site-fav"><img src="https://www.google.com/s2/favicons?domain=${domain}&sz=32" onerror="this.style.display='none'" alt=""/></div>
+          <div class="site-name">${domain}</div>
+          <div class="site-bar-col"><div class="site-bar-bg"><div class="site-bar-fill" style="width:${bp}%;background:${barColor(decay)}"></div></div></div>
+          <div class="site-time">${fmtTime(sec)}</div>
+          <div class="site-pct">${pct}%</div>
+        </div>`;
+      }).join('');
+    }
+  } else {if(sl)sl.style.display='none';if(sc)sc.style.display='none';}
+  renderChart();
+}
+
+// CHART
+async function renderChart(){
+  const bars=$('chart-bars');if(!bars)return;
+  const user=auth.currentUser;if(!user)return;
+  try{
+    const snap=await getDocs(collection(db,'users',user.uid,'history'));
+    const all=[];snap.forEach(d=>all.push(d.data()));
+    all.sort((a,b)=>a.date.localeCompare(b.date));
+    const last7=all.slice(-7);
+    if(!last7.length){bars.innerHTML='<div style="color:#555;font-size:12px;width:100%;text-align:center;align-self:center">No data yet</div>';return;}
+    const maxSec=Math.max(...last7.map(e=>e.totalSec),1);
+    const days=['Su','Mo','Tu','We','Th','Fr','Sa'];
+    bars.innerHTML=last7.map(e=>{
+      const h=Math.round((e.totalSec/maxSec)*72)+4;
+      return `<div class="chart-col"><div class="chart-bar" style="background:${barColor(e.decay)};height:${h}px"></div><div class="chart-day">${days[new Date(e.date).getDay()]}</div></div>`;
+    }).join('');
+  }catch{bars.innerHTML='<div style="color:#555;font-size:12px;width:100%;text-align:center;align-self:center">No data yet</div>';}
+}
+
+// HISTORY
+async function renderHistory(){
+  const list=$('hist-list');if(!list)return;
+  const user=auth.currentUser;if(!user)return;
+  list.innerHTML='<div style="color:#555;font-size:13px;text-align:center;padding:2rem">Loading...</div>';
+  try{
+    const snap=await getDocs(collection(db,'users',user.uid,'history'));
+    const entries=[];snap.forEach(d=>entries.push(d.data()));
+    entries.sort((a,b)=>b.date.localeCompare(a.date));
+    if(!entries.length){list.innerHTML='<div style="color:#555;font-size:14px;text-align:center;padding:2rem">No days logged yet.<br/>Install the extension to start tracking.</div>';return;}
+    const stages=['happy','tired','sad','broken','💀'];
+    list.innerHTML=entries.map(e=>{
+      const stage=Math.min(Math.floor(e.decay*5),4);
+      const cls=e.decay<0.33?'score-ok':e.decay<0.66?'score-bad':'score-rip';
+      const r=Math.round(244-e.decay*64),g=Math.round(160-e.decay*60),b=Math.round(181-e.decay*71);
+      const col=`rgb(${r},${g},${b})`;
+      const md=e.decay<0.25?'M19 20 Q23 23 27 20':e.decay<0.55?'M19 21 Q23 21 27 21':'M19 23 Q23 20 27 23';
+      const device=e.device?`<span style="color:#555;margin-left:6px">· ${e.device}</span>`:'';
+      return `<div class="hist-entry">
+        <svg viewBox="0 0 46 40" width="44" height="38" xmlns="http://www.w3.org/2000/svg" style="flex-shrink:0">
+          <ellipse cx="23" cy="30" rx="17" ry="10" fill="${col}"/>
+          <ellipse cx="23" cy="19" rx="12" ry="11" fill="${col}"/>
+          <ellipse cx="14" cy="11" rx="5" ry="4" fill="${col}"/>
+          <ellipse cx="32" cy="11" rx="5" ry="4" fill="${col}"/>
+          <ellipse cx="23" cy="24" rx="6" ry="4" fill="#F4C5D3"/>
+          <circle cx="20" cy="16" r="2.5" fill="white"/><circle cx="20" cy="16" r="1.2" fill="#2A1A1F"/>
+          <circle cx="26" cy="16" r="2.5" fill="white"/><circle cx="26" cy="16" r="1.2" fill="#2A1A1F"/>
+          <path d="${md}" stroke="#D47090" stroke-width="1" fill="none" stroke-linecap="round"/>
+        </svg>
+        <div class="hist-info">
+          <div class="hist-date">${e.date}${device}</div>
+          <div class="hist-vals">${fmtTime(e.totalSec)} across ${e.sites} sites</div>
+        </div>
+        <div class="hist-score ${cls}">${stages[stage]}</div>
+      </div>`;
+    }).join('');
+  }catch{list.innerHTML='<div style="color:#555;font-size:13px;text-align:center;padding:2rem">Failed to load history.</div>';}
+}
+
+// EVENTS
+$('btn-get-started').addEventListener('click',showSignup);
+$('btn-sign-in').addEventListener('click',showSignin);
+$('go-signin').addEventListener('click',showSignin);
+$('go-signup').addEventListener('click',showSignup);
+$('auth-back').addEventListener('click',()=>showScreen('landing'));
+$('btn-logout').addEventListener('click',()=>signOut(auth));
+$('hist-logout').addEventListener('click',()=>signOut(auth));
+$('bnav-today').addEventListener('click',()=>{showScreen('dashboard');document.querySelectorAll('#dashboard .bnav').forEach(b=>b.classList.remove('active'));$('bnav-today').classList.add('active');});
+$('bnav-history').addEventListener('click',()=>showScreen('history'));
+$('bnav-today-2').addEventListener('click',()=>showScreen('dashboard'));
+$('bnav-history-2').addEventListener('click',()=>{showScreen('history');document.querySelectorAll('#history .bnav').forEach(b=>b.classList.remove('active'));$('bnav-history-2').classList.add('active');});
+setInterval(()=>{if($('dashboard').classList.contains('active'))renderDash();},30000);
+</script>
+</body>
+</html>
