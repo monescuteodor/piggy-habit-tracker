@@ -1,0 +1,38 @@
+{
+  "manifest_version": 3,
+  "name": "Piggy — Screen Time Tracker",
+  "version": "1.0",
+  "description": "Tracks how long you spend on each site and shows it through your little pig.",
+  "permissions": [
+    "tabs",
+    "storage",
+    "alarms",
+    "idle"
+  ],
+  "host_permissions": [
+    "<all_urls>"
+  ],
+  "background": {
+    "service_worker": "background.js"
+  },
+  "content_scripts": [
+    {
+      "matches": ["https://piggy-tracker.edgeone.dev/"],
+      "js": ["content.js"],
+      "run_at": "document_start"
+    }
+  ],
+  "action": {
+    "default_popup": "popup.html",
+    "default_icon": {
+      "16": "icon16.png",
+      "48": "icon48.png",
+      "128": "icon128.png"
+    }
+  },
+  "icons": {
+    "16": "icon16.png",
+    "48": "icon48.png",
+    "128": "icon128.png"
+  }
+}

@@ -1,0 +1,581 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Piggy — your habits age him</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"/>
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;500;700;800&family=Inter:wght@400;500&display=swap" rel="stylesheet"/>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --pink:#F4A0B5;--pink-light:#FCE8EF;--pink-dark:#D47090;
+  --bg:#2A1A1F;--bg2:#3D2530;--bg3:#5a3040;
+  --cream:#FDF6F0;--gray:#888;--gray2:#555;
+  --green:#6BAE3E;--amber:#D4920B;--red:#E24B4A;
+  --radius:14px;
+}
+html{font-family:'Inter',sans-serif;background:var(--bg);color:var(--cream);min-height:100vh}
+button{cursor:pointer;font-family:inherit}
+a{color:inherit;text-decoration:none}
+
+/* SCREENS */
+.screen{display:none;min-height:100vh;flex-direction:column}
+.screen.active{display:flex}
+
+/* ── LANDING ── */
+#landing{align-items:center;justify-content:center;text-align:center;padding:2rem;position:relative;overflow:hidden}
+#landing::before{content:'';position:absolute;inset:0;background:radial-gradient(ellipse 60% 50% at 50% 60%,#3D2530 0%,transparent 70%);pointer-events:none}
+.landing-inner{position:relative;z-index:1;max-width:460px}
+.logo{font-family:'Syne',sans-serif;font-size:56px;font-weight:800;color:var(--pink);letter-spacing:-2px;line-height:1}
+.tagline{font-size:15px;color:var(--gray);margin:10px 0 36px;letter-spacing:0.02em}
+.hero-pig{margin:0 auto 36px;width:160px;height:130px}
+.cta-stack{display:flex;flex-direction:column;gap:12px;align-items:center}
+.btn-pink{background:var(--pink);color:var(--bg);border:none;padding:14px 36px;border-radius:100px;font-size:15px;font-weight:600;transition:0.2s}
+.btn-pink:hover{background:#F4C5D3;transform:translateY(-1px)}
+.btn-ghost{background:transparent;color:var(--gray);border:1px solid var(--bg2);padding:12px 28px;border-radius:100px;font-size:14px;transition:0.2s}
+.btn-ghost:hover{border-color:var(--pink);color:var(--pink)}
+.fine-print{font-size:12px;color:var(--gray2);margin-top:24px}
+
+/* ── AUTH ── */
+#auth{align-items:center;justify-content:center;padding:2rem}
+.auth-card{background:var(--bg2);border:1px solid var(--bg3);border-radius:20px;padding:2rem;width:100%;max-width:380px}
+.auth-logo{font-family:'Syne',sans-serif;font-size:28px;font-weight:800;color:var(--pink);text-align:center;margin-bottom:6px}
+.auth-sub{text-align:center;font-size:13px;color:var(--gray);margin-bottom:28px}
+.auth-google{display:flex;align-items:center;justify-content:center;gap:10px;width:100%;padding:13px;background:var(--cream);color:var(--bg);border:none;border-radius:12px;font-size:14px;font-weight:500;margin-bottom:20px;transition:0.2s}
+.auth-google:hover{background:#fff;transform:translateY(-1px)}
+.divider{display:flex;align-items:center;gap:12px;margin-bottom:20px}
+.divider span{font-size:12px;color:var(--gray2);white-space:nowrap}
+.divider::before,.divider::after{content:'';flex:1;height:1px;background:var(--bg3)}
+.field{margin-bottom:14px}
+.field label{display:block;font-size:12px;color:var(--gray);margin-bottom:6px}
+.field input{width:100%;padding:12px 14px;background:var(--bg);border:1px solid var(--bg3);border-radius:10px;color:var(--cream);font-size:14px;font-family:inherit;outline:none;transition:0.2s}
+.field input:focus{border-color:var(--pink)}
+.auth-submit{width:100%;padding:13px;background:var(--pink);color:var(--bg);border:none;border-radius:12px;font-size:14px;font-weight:600;margin-top:8px;transition:0.2s}
+.auth-submit:hover{background:#F4C5D3}
+.auth-toggle{text-align:center;font-size:13px;color:var(--gray);margin-top:16px}
+.auth-toggle span{color:var(--pink);cursor:pointer}
+.back-link{text-align:center;margin-top:14px;font-size:12px;color:var(--gray2);cursor:pointer}
+.back-link:hover{color:var(--pink)}
+
+/* ── DASHBOARD ── */
+#dashboard{background:var(--bg)}
+.nav{display:flex;align-items:center;justify-content:space-between;padding:1.2rem 1.5rem;border-bottom:1px solid var(--bg2);flex-shrink:0}
+.nav-logo{font-family:'Syne',sans-serif;font-size:20px;font-weight:800;color:var(--pink)}
+.nav-right{display:flex;align-items:center;gap:10px}
+.avatar{width:32px;height:32px;border-radius:50%;background:var(--pink);display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:600;color:var(--bg)}
+.btn-logout{font-size:12px;color:var(--gray);padding:4px 10px;border-radius:6px;border:1px solid var(--bg2);background:transparent;font-family:inherit;transition:0.2s}
+.btn-logout:hover{color:var(--pink);border-color:var(--pink)}
+
+.dash-scroll{flex:1;overflow-y:auto;padding:1.5rem;max-width:600px;margin:0 auto;width:100%}
+
+/* pig + summary */
+.top-row{display:flex;gap:1.5rem;align-items:flex-start;margin-bottom:1.5rem}
+.pig-col{flex-shrink:0;text-align:center}
+.pig-stage{font-size:11px;color:var(--gray);margin-top:4px;text-transform:uppercase;letter-spacing:0.05em}
+.pig-dots{display:flex;gap:5px;justify-content:center;margin-top:6px}
+.pig-dot{width:7px;height:7px;border-radius:50%;background:var(--bg2)}
+.pig-dot.on{background:var(--pink)}
+.summary-col{flex:1}
+.greeting{font-family:'Syne',sans-serif;font-size:22px;font-weight:700;line-height:1.2;margin-bottom:6px}
+.verdict-text{font-size:13px;color:var(--gray);line-height:1.5;margin-bottom:12px;font-style:italic}
+.streak{display:inline-flex;align-items:center;gap:6px;background:var(--bg2);border:1px solid var(--bg3);border-radius:100px;padding:6px 14px;font-size:13px;color:var(--pink)}
+
+/* total card */
+.total-card{background:var(--bg2);border:1px solid var(--bg3);border-radius:14px;padding:1.2rem 1.4rem;display:flex;align-items:center;justify-content:space-between;margin-bottom:1.5rem}
+.total-label{font-size:10px;color:var(--gray2);text-transform:uppercase;letter-spacing:0.07em;margin-bottom:4px}
+.total-val{font-size:32px;font-weight:700;color:var(--pink);line-height:1}
+.total-sub{font-size:12px;color:var(--gray2);margin-top:4px}
+.ring-wrap{position:relative;width:60px;height:60px;flex-shrink:0}
+.ring-wrap svg{transform:rotate(-90deg)}
+.ring-pct{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:600;color:var(--pink)}
+
+/* sites */
+.section-label{font-size:11px;font-weight:500;letter-spacing:0.1em;text-transform:uppercase;color:var(--gray2);margin-bottom:10px}
+.sites-card{background:var(--bg2);border:1px solid var(--bg3);border-radius:14px;overflow:hidden;margin-bottom:1.5rem}
+.site-row{display:flex;align-items:center;gap:10px;padding:10px 14px}
+.site-row+.site-row{border-top:1px solid var(--bg3)}
+.site-fav{width:18px;height:18px;border-radius:4px;flex-shrink:0;overflow:hidden;background:var(--bg);display:flex;align-items:center;justify-content:center}
+.site-fav img{width:16px;height:16px;border-radius:3px}
+.site-name{flex:1;font-size:13px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.site-bar-col{width:80px;flex-shrink:0}
+.site-bar-bg{height:4px;background:var(--bg);border-radius:2px;overflow:hidden}
+.site-bar-fill{height:100%;border-radius:2px}
+.site-time{font-size:12px;color:var(--gray);flex-shrink:0;min-width:46px;text-align:right}
+.site-pct{font-size:11px;color:var(--gray2);flex-shrink:0;min-width:30px;text-align:right}
+
+/* chart */
+.chart-card{background:var(--bg2);border:1px solid var(--bg3);border-radius:14px;padding:1.2rem;margin-bottom:1.5rem}
+.chart-bars{display:flex;align-items:flex-end;gap:8px;height:80px;margin-bottom:8px}
+.chart-col{flex:1;display:flex;flex-direction:column;align-items:center;gap:4px}
+.chart-bar{width:100%;border-radius:4px 4px 0 0;min-height:4px}
+.chart-day{font-size:10px;color:var(--gray2)}
+.chart-legend{display:flex;gap:14px;flex-wrap:wrap;margin-top:8px}
+.legend-item{font-size:11px;color:var(--gray);display:flex;align-items:center;gap:5px}
+.legend-dot{width:8px;height:8px;border-radius:50%}
+
+/* no extension banner */
+.ext-banner{background:var(--bg2);border:1px solid var(--bg3);border-radius:14px;padding:1.2rem 1.4rem;margin-bottom:1.5rem;text-align:center}
+.ext-banner p{font-size:13px;color:var(--gray);line-height:1.6}
+.ext-banner strong{color:var(--cream)}
+
+/* history */
+#history{background:var(--bg)}
+.hist-scroll{flex:1;overflow-y:auto;padding:1.5rem;max-width:600px;margin:0 auto;width:100%}
+.hist-title{font-family:'Syne',sans-serif;font-size:22px;font-weight:700;margin-bottom:4px}
+.hist-sub{font-size:13px;color:var(--gray);margin-bottom:1.5rem}
+.hist-list{display:flex;flex-direction:column;gap:10px}
+.hist-entry{background:var(--bg2);border:1px solid var(--bg3);border-radius:12px;padding:1rem 1.2rem;display:flex;align-items:center;gap:14px}
+.hist-info{flex:1}
+.hist-date{font-size:12px;color:var(--gray2);margin-bottom:3px}
+.hist-vals{font-size:13px;color:var(--gray)}
+.hist-score{font-size:13px;font-weight:500}
+.score-ok{color:var(--green)}
+.score-bad{color:var(--amber)}
+.score-rip{color:var(--red)}
+
+/* bottom nav */
+.bottom-nav{display:flex;border-top:1px solid var(--bg2);background:var(--bg);flex-shrink:0}
+.bnav{flex:1;padding:14px 0;text-align:center;font-size:11px;color:var(--gray2);cursor:pointer;border:none;background:transparent;font-family:inherit;display:flex;flex-direction:column;align-items:center;gap:4px;transition:0.2s}
+.bnav.active{color:var(--pink)}
+.bnav svg{width:20px;height:20px}
+
+@media(max-width:480px){
+  .top-row{flex-direction:column;align-items:center;text-align:center}
+  .logo{font-size:42px}
+}
+</style>
+</head>
+<body>
+
+<!-- ══ LANDING ══════════════════════════════════════════════ -->
+<div class="screen active" id="landing">
+  <div class="landing-inner">
+    <div class="hero-pig">
+      <svg viewBox="0 0 160 130" xmlns="http://www.w3.org/2000/svg">
+        <ellipse cx="80" cy="100" rx="48" ry="28" fill="#F4A0B5"/>
+        <ellipse cx="80" cy="70" rx="32" ry="30" fill="#F4A0B5"/>
+        <ellipse cx="58" cy="48" rx="11" ry="8" fill="#F4A0B5"/>
+        <ellipse cx="102" cy="48" rx="11" ry="8" fill="#F4A0B5"/>
+        <ellipse cx="58" cy="48" rx="6" ry="4" fill="#F4C5D3"/>
+        <ellipse cx="102" cy="48" rx="6" ry="4" fill="#F4C5D3"/>
+        <ellipse cx="80" cy="80" rx="13" ry="9" fill="#F4C5D3"/>
+        <circle cx="76" cy="80" r="2.5" fill="#D47090"/>
+        <circle cx="84" cy="80" r="2.5" fill="#D47090"/>
+        <circle cx="71" cy="64" r="4.5" fill="white"/>
+        <circle cx="71" cy="64" r="2.2" fill="#2A1A1F"/>
+        <circle cx="89" cy="64" r="4.5" fill="white"/>
+        <circle cx="89" cy="64" r="2.2" fill="#2A1A1F"/>
+        <path d="M74 73 Q80 78 86 73" stroke="#D47090" stroke-width="1.5" fill="none" stroke-linecap="round"/>
+        <rect x="60" y="120" width="12" height="10" rx="6" fill="#F4A0B5"/>
+        <rect x="88" y="120" width="12" height="10" rx="6" fill="#F4A0B5"/>
+        <ellipse cx="80" cy="28" rx="16" ry="4" fill="none" stroke="#FFD700" stroke-width="2"/>
+      </svg>
+    </div>
+    <div class="logo">Piggy</div>
+    <div class="tagline">your habits age him.</div>
+    <div class="cta-stack">
+      <button class="btn-pink" onclick="showScreen('auth')">Get started — it's free</button>
+      <button class="btn-ghost" onclick="demoLogin()">Try the demo</button>
+    </div>
+    <div class="fine-print">no phone access. no APIs. just you and the pig.</div>
+  </div>
+</div>
+
+<!-- ══ AUTH ═════════════════════════════════════════════════ -->
+<div class="screen" id="auth">
+  <div class="auth-card">
+    <div class="auth-logo">Piggy</div>
+    <div class="auth-sub">The pig is waiting for you.</div>
+    <button class="auth-google" onclick="demoLogin()">
+      <svg width="18" height="18" viewBox="0 0 18 18"><path d="M17.64 9.2c0-.637-.057-1.251-.164-1.84H9v3.481h4.844a4.14 4.14 0 0 1-1.796 2.716v2.259h2.908c1.702-1.567 2.684-3.875 2.684-6.615Z" fill="#4285F4"/><path d="M9 18c2.43 0 4.467-.806 5.956-2.18l-2.908-2.259c-.806.54-1.837.86-3.048.86-2.344 0-4.328-1.584-5.036-3.711H.957v2.332A8.997 8.997 0 0 0 9 18Z" fill="#34A853"/><path d="M3.964 10.71A5.41 5.41 0 0 1 3.682 9c0-.593.102-1.17.282-1.71V4.958H.957A8.996 8.996 0 0 0 0 9c0 1.452.348 2.827.957 4.042l3.007-2.332Z" fill="#FBBC05"/><path d="M9 3.58c1.321 0 2.508.454 3.44 1.345l2.582-2.58C13.463.891 11.426 0 9 0A8.997 8.997 0 0 0 .957 4.958L3.964 6.29C4.672 4.163 6.656 3.58 9 3.58Z" fill="#EA4335"/></svg>
+      Continue with Google
+    </button>
+    <div class="divider"><span>or with email</span></div>
+    <div class="field"><label>Email</label><input type="email" placeholder="you@example.com"/></div>
+    <div class="field"><label>Password</label><input type="password" placeholder="••••••••"/></div>
+    <button class="auth-submit" onclick="demoLogin()">Sign in</button>
+    <div class="auth-toggle">No account? <span onclick="demoLogin()">Sign up</span></div>
+    <div class="back-link" onclick="showScreen('landing')">← Back</div>
+  </div>
+</div>
+
+<!-- ══ DASHBOARD ═════════════════════════════════════════════ -->
+<div class="screen" id="dashboard">
+  <div class="nav">
+    <div class="nav-logo">Piggy</div>
+    <div class="nav-right">
+      <div class="avatar" id="user-avatar">T</div>
+      <button class="btn-logout" onclick="showScreen('landing')">Sign out</button>
+    </div>
+  </div>
+
+  <div class="dash-scroll">
+
+    <!-- pig + greeting -->
+    <div class="top-row">
+      <div class="pig-col">
+        <svg id="dash-pig" viewBox="0 0 120 100" width="110" height="92" xmlns="http://www.w3.org/2000/svg">
+          <ellipse id="dp-body" cx="60" cy="76" rx="38" ry="22" fill="#F4A0B5"/>
+          <ellipse id="dp-head" cx="60" cy="52" rx="26" ry="24" fill="#F4A0B5"/>
+          <ellipse cx="42" cy="36" rx="9" ry="7" fill="#F4A0B5" id="dp-el"/>
+          <ellipse cx="78" cy="36" rx="9" ry="7" fill="#F4A0B5" id="dp-er"/>
+          <ellipse cx="42" cy="36" rx="5" ry="4" fill="#F4C5D3"/>
+          <ellipse cx="78" cy="36" rx="5" ry="4" fill="#F4C5D3"/>
+          <ellipse cx="60" cy="62" rx="10" ry="7" fill="#F4C5D3"/>
+          <circle cx="57" cy="62" r="2" fill="#D47090"/>
+          <circle cx="63" cy="62" r="2" fill="#D47090"/>
+          <circle id="dp-elw" cx="52" cy="47" r="4" fill="white"/>
+          <circle cx="52" cy="47" r="2" fill="#2A1A1F" id="dp-elp"/>
+          <circle id="dp-erw" cx="68" cy="47" r="4" fill="white"/>
+          <circle cx="68" cy="47" r="2" fill="#2A1A1F" id="dp-erp"/>
+          <path id="dp-mouth" d="M55 56 Q60 60 65 56" stroke="#D47090" stroke-width="1.5" fill="none" stroke-linecap="round"/>
+          <rect x="48" y="90" width="10" height="8" rx="5" fill="#F4A0B5"/>
+          <rect x="62" y="90" width="10" height="8" rx="5" fill="#F4A0B5"/>
+          <g id="dp-wrinkles" opacity="0">
+            <path d="M47 44 Q50 42 53 44" fill="none" stroke="#D47090" stroke-width="0.8" opacity="0.6"/>
+            <path d="M67 44 Q70 42 73 44" fill="none" stroke="#D47090" stroke-width="0.8" opacity="0.6"/>
+            <path d="M55 68 Q60 71 65 68" stroke="#D47090" stroke-width="1" fill="none" opacity="0.7"/>
+          </g>
+          <g id="dp-bags" opacity="0">
+            <path d="M49 51 Q52 54 55 51" fill="none" stroke="#D47090" stroke-width="0.8" opacity="0.5"/>
+            <path d="M65 51 Q68 54 71 51" fill="none" stroke="#D47090" stroke-width="0.8" opacity="0.5"/>
+          </g>
+          <g id="dp-xeyes" opacity="0">
+            <line x1="49" y1="44" x2="55" y2="50" stroke="#2A1A1F" stroke-width="1.5" stroke-linecap="round"/>
+            <line x1="55" y1="44" x2="49" y2="50" stroke="#2A1A1F" stroke-width="1.5" stroke-linecap="round"/>
+            <line x1="65" y1="44" x2="71" y2="50" stroke="#2A1A1F" stroke-width="1.5" stroke-linecap="round"/>
+            <line x1="71" y1="44" x2="65" y2="50" stroke="#2A1A1F" stroke-width="1.5" stroke-linecap="round"/>
+          </g>
+          <ellipse id="dp-halo" cx="60" cy="18" rx="18" ry="4" fill="none" stroke="#FFD700" stroke-width="2" opacity="0"/>
+        </svg>
+        <div class="pig-dots" id="dp-dots">
+          <div class="pig-dot"></div><div class="pig-dot"></div><div class="pig-dot"></div>
+          <div class="pig-dot"></div><div class="pig-dot"></div>
+        </div>
+        <div class="pig-stage" id="dp-stage">happy</div>
+      </div>
+      <div class="summary-col">
+        <div class="greeting" id="dash-greeting">Hey, Teo!</div>
+        <div class="verdict-text" id="dash-verdict">"The pig is proud of you. For now."</div>
+        <div class="streak" id="dash-streak">🔥 3 day streak</div>
+      </div>
+    </div>
+
+    <!-- total screen time -->
+    <div class="section-label">Today</div>
+    <div class="total-card">
+      <div>
+        <div class="total-label">Total screen time</div>
+        <div class="total-val" id="total-val">—</div>
+        <div class="total-sub" id="total-sub">across 0 sites</div>
+      </div>
+      <div class="ring-wrap">
+        <svg width="60" height="60" viewBox="0 0 60 60">
+          <circle cx="30" cy="30" r="24" fill="none" stroke="#3D2530" stroke-width="5"/>
+          <circle id="ring-fill" cx="30" cy="30" r="24" fill="none" stroke="#F4A0B5"
+            stroke-width="5" stroke-dasharray="150.8" stroke-dashoffset="150.8"
+            stroke-linecap="round" style="transition:stroke-dashoffset 0.6s ease"/>
+        </svg>
+        <div class="ring-pct" id="ring-pct">0%</div>
+      </div>
+    </div>
+
+    <!-- top sites -->
+    <div class="section-label" id="sites-label" style="display:none">Top sites</div>
+    <div class="sites-card" id="sites-card" style="display:none"></div>
+
+    <!-- no extension banner -->
+    <div class="ext-banner" id="ext-banner">
+      <p>
+        <strong>No data yet.</strong><br/>
+        Install the <strong>Piggy Chrome extension</strong> to automatically track your screen time.<br/>
+        Once installed, data will appear here in real time.
+      </p>
+    </div>
+
+    <!-- 7-day chart -->
+    <div class="section-label">Last 7 days</div>
+    <div class="chart-card">
+      <div class="chart-bars" id="chart-bars"></div>
+      <div class="chart-legend">
+        <div class="legend-item"><div class="legend-dot" style="background:#6BAE3E"></div>good</div>
+        <div class="legend-item"><div class="legend-dot" style="background:#D4920B"></div>hmm</div>
+        <div class="legend-item"><div class="legend-dot" style="background:#E24B4A"></div>rip</div>
+      </div>
+    </div>
+
+  </div><!-- end dash-scroll -->
+
+  <div class="bottom-nav">
+    <button class="bnav active" onclick="switchTab('dashboard')">
+      <svg fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
+      Today
+    </button>
+    <button class="bnav" onclick="switchTab('history')">
+      <svg fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+      History
+    </button>
+  </div>
+</div>
+
+<!-- ══ HISTORY ════════════════════════════════════════════════ -->
+<div class="screen" id="history">
+  <div class="nav">
+    <div class="nav-logo">Piggy</div>
+    <div class="nav-right">
+      <div class="avatar">T</div>
+      <button class="btn-logout" onclick="showScreen('landing')">Sign out</button>
+    </div>
+  </div>
+  <div class="hist-scroll">
+    <div class="hist-title">History</div>
+    <div class="hist-sub">How your pig has been doing.</div>
+    <div class="hist-list" id="hist-list"></div>
+  </div>
+  <div class="bottom-nav">
+    <button class="bnav" onclick="switchTab('dashboard')">
+      <svg fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
+      Today
+    </button>
+    <button class="bnav active" onclick="switchTab('history')">
+      <svg fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+      History
+    </button>
+  </div>
+</div>
+
+<script>
+// ── STORAGE ─────────────────────────────────────────────────
+const SK = 'piggy_site_v1';
+let state = JSON.parse(localStorage.getItem(SK)||'null') || {
+  user: null, streak: 0,
+  history: [
+    {date:'2026-07-21',totalSec:10800,sites:4,decay:0.25},
+    {date:'2026-07-22',totalSec:21600,sites:7,decay:0.50},
+    {date:'2026-07-23',totalSec:32400,sites:9,decay:0.75},
+    {date:'2026-07-24',totalSec:14400,sites:5,decay:0.33},
+    {date:'2026-07-25',totalSec:18000,sites:6,decay:0.42},
+    {date:'2026-07-26',totalSec:7200,sites:3,decay:0.17},
+  ]
+};
+function save(){ localStorage.setItem(SK, JSON.stringify(state)); }
+
+// ── HELPERS ──────────────────────────────────────────────────
+function fmtTime(sec){
+  if(sec<=0) return '0min';
+  const m=Math.floor(sec/60);
+  if(m<60) return m+'min';
+  const h=Math.floor(m/60), r=m%60;
+  return r>0?`${h}h ${r}min`:`${h}h`;
+}
+function decayFrom(sec){ return Math.min(sec/(12*3600),1); }
+function barColor(d){ return d<0.33?'#6BAE3E':d<0.66?'#D4920B':'#E24B4A'; }
+function todayKey(){ return new Date().toISOString().slice(0,10); }
+
+// ── SCREENS ──────────────────────────────────────────────────
+function showScreen(id){
+  document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active'));
+  document.getElementById(id).classList.add('active');
+  if(id==='dashboard') renderDash();
+  if(id==='history')   renderHistory();
+}
+function switchTab(id){
+  showScreen(id);
+  document.querySelectorAll('.bnav').forEach(b=>b.classList.remove('active'));
+  const target = id==='dashboard'?0:1;
+  document.querySelectorAll(`#${id} .bnav`)[target]?.classList.add('active');
+}
+function demoLogin(){
+  state.user={name:'Teo'};
+  state.streak=3;
+  save();
+  showScreen('dashboard');
+}
+
+// ── PIG ──────────────────────────────────────────────────────
+function applyPig(decay){
+  const r=Math.round(244-decay*64),g=Math.round(160-decay*60),b=Math.round(181-decay*71);
+  const col=`rgb(${r},${g},${b})`;
+  ['dp-body','dp-head','dp-el','dp-er'].forEach(id=>{
+    const el=document.getElementById(id); if(el) el.setAttribute('fill',col);
+  });
+  const mouth=document.getElementById('dp-mouth');
+  if(mouth){
+    if(decay<0.2)      mouth.setAttribute('d','M55 56 Q60 60 65 56');
+    else if(decay<0.5) mouth.setAttribute('d','M55 58 Q60 58 65 58');
+    else               mouth.setAttribute('d','M55 61 Q60 57 65 61');
+  }
+  const dead=decay>0.8?(decay-0.8)/0.2:0;
+  ['dp-elw','dp-erw','dp-elp','dp-erp'].forEach(id=>{
+    const el=document.getElementById(id); if(el) el.style.opacity=1-dead;
+  });
+  const xe=document.getElementById('dp-xeyes'); if(xe) xe.style.opacity=dead;
+  const wr=document.getElementById('dp-wrinkles'); if(wr) wr.style.opacity=decay>0.3?Math.min((decay-0.3)/0.5,1):0;
+  const bg=document.getElementById('dp-bags');     if(bg) bg.style.opacity=decay>0.4?Math.min((decay-0.4)/0.4,1):0;
+  const hl=document.getElementById('dp-halo');     if(hl) hl.style.opacity=decay<0.05?1:0;
+
+  const stages=['happy 🌸','tired 😐','sad 😔','broken 😩','dead inside 💀'];
+  const verdicts=[
+    '"The pig is proud of you. For now."',
+    '"The pig noticed some things. He\'s not saying anything, but he knows."',
+    '"The pig has dark circles. He stayed up thinking about you."',
+    '"The pig looked in the mirror and cried."',
+    '"The pig left a note. It just says: why?"'
+  ];
+  const stage=Math.min(Math.floor(decay*5),4);
+  const stageEl=document.getElementById('dp-stage');   if(stageEl) stageEl.textContent=stages[stage];
+  const verdEl=document.getElementById('dash-verdict'); if(verdEl)  verdEl.textContent=verdicts[stage];
+  const dots=document.querySelectorAll('#dp-dots .pig-dot');
+  dots.forEach((d,i)=>d.classList.toggle('on',i<stage));
+}
+
+function updateRing(decay){
+  const C=2*Math.PI*24;
+  const fill=document.getElementById('ring-fill');
+  const pctEl=document.getElementById('ring-pct');
+  if(fill){ fill.style.strokeDashoffset=C*(1-decay); fill.setAttribute('stroke',barColor(decay)); }
+  if(pctEl) pctEl.textContent=Math.round(decay*100)+'%';
+}
+
+// ── EXTENSION DATA ───────────────────────────────────────────
+function loadExtensionData(){
+  // Try to get data from the Piggy extension via localStorage bridge
+  // Extension writes to 'piggy_time' key in its own storage —
+  // we read it here if the extension injected it, otherwise show banner.
+  const raw = localStorage.getItem('piggy_ext_bridge');
+  if(!raw) return null;
+  try{ return JSON.parse(raw); } catch{ return null; }
+}
+
+// ── DASHBOARD RENDER ─────────────────────────────────────────
+function renderDash(){
+  const extData = loadExtensionData();
+  const today   = todayKey();
+
+  let totalSec = 0;
+  let entries  = [];
+  let hasExt   = false;
+
+  if(extData && extData[today]){
+    hasExt  = true;
+    entries = Object.entries(extData[today]).sort((a,b)=>b[1]-a[1]);
+    totalSec= entries.reduce((s,[,v])=>s+v,0);
+    // Save to history
+    const decay=decayFrom(totalSec);
+    const existing=state.history.findIndex(h=>h.date===today);
+    const entry={date:today,totalSec,sites:entries.length,decay:Math.round(decay*100)/100};
+    if(existing>=0) state.history[existing]=entry;
+    else state.history.push(entry);
+    state.history.sort((a,b)=>a.date.localeCompare(b.date));
+    save();
+  }
+
+  const decay=decayFrom(totalSec);
+  applyPig(decay);
+  updateRing(decay);
+
+  document.getElementById('total-val').textContent = totalSec>0?fmtTime(totalSec):'0min';
+  document.getElementById('total-sub').textContent = `across ${entries.length} site${entries.length!==1?'s':''}`;
+  document.getElementById('dash-streak').textContent = `🔥 ${state.streak||0} day streak`;
+
+  // Extension banner
+  document.getElementById('ext-banner').style.display = hasExt?'none':'block';
+
+  // Sites
+  const sitesLabel=document.getElementById('sites-label');
+  const sitesCard=document.getElementById('sites-card');
+  const top5=entries.slice(0,5);
+  if(top5.length>0 && sitesLabel && sitesCard){
+    sitesLabel.style.display='block';
+    sitesCard.style.display='block';
+    sitesCard.innerHTML=top5.map(([domain,sec])=>{
+      const pct=Math.round(sec/totalSec*100);
+      const barPct=Math.round(sec/entries[0][1]*100);
+      const col=barColor(decay);
+      return `<div class="site-row">
+        <div class="site-fav"><img src="https://www.google.com/s2/favicons?domain=${domain}&sz=32" onerror="this.style.display='none'" alt=""/></div>
+        <div class="site-name">${domain}</div>
+        <div class="site-bar-col"><div class="site-bar-bg"><div class="site-bar-fill" style="width:${barPct}%;background:${col}"></div></div></div>
+        <div class="site-time">${fmtTime(sec)}</div>
+        <div class="site-pct">${pct}%</div>
+      </div>`;
+    }).join('');
+  } else if(sitesLabel && sitesCard){
+    sitesLabel.style.display='none';
+    sitesCard.style.display='none';
+  }
+
+  renderChart();
+}
+
+// ── CHART ────────────────────────────────────────────────────
+function renderChart(){
+  const bars=document.getElementById('chart-bars');
+  if(!bars) return;
+  const last7=state.history.slice(-7);
+  if(last7.length===0){ bars.innerHTML='<div style="color:#555;font-size:12px;text-align:center;width:100%">No data yet</div>'; return; }
+  const maxSec=Math.max(...last7.map(e=>e.totalSec),1);
+  const days=['Su','Mo','Tu','We','Th','Fr','Sa'];
+  bars.innerHTML=last7.map(e=>{
+    const d=new Date(e.date);
+    const h=Math.round((e.totalSec/maxSec)*72)+4;
+    const col=barColor(e.decay);
+    return `<div class="chart-col">
+      <div class="chart-bar" style="background:${col};height:${h}px"></div>
+      <div class="chart-day">${days[d.getDay()]}</div>
+    </div>`;
+  }).join('');
+}
+
+// ── HISTORY ──────────────────────────────────────────────────
+function miniPig(decay){
+  const r=Math.round(244-decay*64),g=Math.round(160-decay*60),b=Math.round(181-decay*71);
+  const col=`rgb(${r},${g},${b})`;
+  const m=decay<0.25?'M19 20 Q23 23 27 20':decay<0.55?'M19 21 Q23 21 27 21':'M19 23 Q23 20 27 23';
+  return `<svg viewBox="0 0 46 40" width="44" height="38" xmlns="http://www.w3.org/2000/svg" style="flex-shrink:0">
+    <ellipse cx="23" cy="30" rx="17" ry="10" fill="${col}"/>
+    <ellipse cx="23" cy="19" rx="12" ry="11" fill="${col}"/>
+    <ellipse cx="14" cy="11" rx="5" ry="4" fill="${col}"/>
+    <ellipse cx="32" cy="11" rx="5" ry="4" fill="${col}"/>
+    <ellipse cx="23" cy="24" rx="6" ry="4" fill="#F4C5D3"/>
+    <circle cx="20" cy="16" r="2.5" fill="white"/><circle cx="20" cy="16" r="1.2" fill="#2A1A1F"/>
+    <circle cx="26" cy="16" r="2.5" fill="white"/><circle cx="26" cy="16" r="1.2" fill="#2A1A1F"/>
+    <path d="${m}" stroke="#D47090" stroke-width="1" fill="none" stroke-linecap="round"/>
+  </svg>`;
+}
+
+function renderHistory(){
+  const list=document.getElementById('hist-list');
+  if(!list) return;
+  const entries=[...state.history].reverse();
+  if(entries.length===0){
+    list.innerHTML='<div style="color:#555;font-size:14px;text-align:center;padding:2rem">No days logged yet.<br/>Install the extension to start tracking.</div>';
+    return;
+  }
+  const stages=['happy','tired','sad','broken','💀'];
+  list.innerHTML=entries.map(e=>{
+    const stage=Math.min(Math.floor(e.decay*5),4);
+    const cls=e.decay<0.33?'score-ok':e.decay<0.66?'score-bad':'score-rip';
+    return `<div class="hist-entry">
+      ${miniPig(e.decay)}
+      <div class="hist-info">
+        <div class="hist-date">${e.date}</div>
+        <div class="hist-vals">${fmtTime(e.totalSec)} across ${e.sites} sites</div>
+      </div>
+      <div class="hist-score ${cls}">${stages[stage]}</div>
+    </div>`;
+  }).join('');
+}
+
+// ── EXTENSION BRIDGE ─────────────────────────────────────────
+// The extension's content script (if you add one) can write to
+// localStorage key 'piggy_ext_bridge' so this page picks it up.
+// For now we poll every 30s in case data arrives while page is open.
+setInterval(()=>{ if(document.getElementById('dashboard').classList.contains('active')) renderDash(); }, 30000);
+
+// ── INIT ─────────────────────────────────────────────────────
+renderDash();
+</script>
+</body>
+</html>
